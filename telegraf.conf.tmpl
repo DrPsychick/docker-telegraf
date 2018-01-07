@@ -1,0 +1,48 @@
+echo
+echo "### TEL_GLOBAL_TAGS*"
+for v in $(set | grep ^TEL_GLOBAL_TAGS| sed -e 's/^\(TEL_GLOBAL_TAGS[^=]*\).*/\1/' | sort | tr '\n', ' '); do
+  val=$(eval echo "\$$v")
+  [ -z "$v" -o -z "$val" ] && continue
+  echo -e "$val"
+done
+
+echo
+echo "### TEL_AGENT*"
+for v in $(set | grep ^TEL_AGENT| sed -e 's/^\(TEL_AGENT[^=]*\).*/\1/' | sort | tr '\n', ' '); do
+  val=$(eval echo "\$$v")
+  [ -z "$v" -o -z "$val" ] && continue
+  echo -e "$val"
+done
+
+echo
+echo "### TEL_OUTPUTS*"
+for v in $(set | grep ^TEL_OUTPUTS| sed -e 's/^\(TEL_OUTPUTS[^=]*\).*/\1/' | sort | tr '\n', ' '); do
+  val=$(eval echo "\$$v")
+  [ -z "$v" -o -z "$val" ] && continue
+  echo -e "$val"
+done
+
+echo
+echo "### TEL_PROCESSORS*"
+for v in $(set | grep ^TEL_PROCESSORS| sed -e 's/^\(TEL_PROCESSORS[^=]*\).*/\1/' | sort | tr '\n', ' '); do
+  val=$(eval echo "\$$v")
+  [ -z "$v" -o -z "$val" ] && continue
+  echo -e "$val"
+done
+
+echo
+echo "### TEL_AGGREGATORS*"
+for v in $(set | grep ^TEL_AGGREGATORS| sed -e 's/^\(TEL_AGGREGATORS[^=]*\).*/\1/' | sort | tr '\n', ' '); do
+  val=$(eval echo "\$$v")
+  [ -z "$v" -o -z "$val" ] && continue
+  echo -e "$val"
+done
+
+echo
+echo "### TEL_INPUTS*"
+for v in $(set | grep ^TEL_INPUTS| sed -e 's/^\(TEL_INPUTS[^=]*\).*/\1/' | sort | tr '\n', ' '); do
+  val=$(eval echo "\$$v")
+  [ -z "$v" -o -z "$val" ] && continue
+  echo -e "$val"
+done
+
