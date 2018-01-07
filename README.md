@@ -45,5 +45,5 @@ TEL_INPUTS_DISK_FLAGS=ignore_fs = ["tmpfs", "devtmpfs", "devfs"]
 
 **Beware**:
 
-Docker only support "simple variables. No ", no ' and especially no newlines in variables.
+Docker only support *simple variables*. No ", no ' and especially no newlines in variables.
 To define a multiline variable, look at the `TEL_INPUTS_CPU_FLAGS` variable in the example output.
