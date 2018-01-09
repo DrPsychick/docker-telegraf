@@ -1,5 +1,6 @@
 FROM telegraf:alpine
 
+COPY default.env /
 COPY envreplace.sh /
 COPY telegraf.conf.tmpl /
 
