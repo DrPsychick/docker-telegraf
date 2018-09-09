@@ -1,5 +1,10 @@
 # docker-telegraf
 
+[![DockerHub build status](https://img.shields.io/docker/build/drpsychick/docker-telegraf.svg)](https://hub.docker.com/r/drpsychick/docker-influxdb/builds/) [![DockerHub build](https://img.shields.io/docker/automated/drpsychick/docker-telegraf.svg)](https://hub.docker.com/r/drpsychick/docker-influxdb/builds/) [![DockerHub pulls](https://img.shields.io/docker/pulls/drpsychick/docker-telegraf.svg)](https://hub.docker.com/r/drpsychick/docker-influxdb/) [![GitHub stars](https://img.shields.io/github/stars/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf) [![DockerHub stars](https://img.shields.io/docker/stars/drpsychick/docker-telegraf.svg)](https://hub.docker.com/r/drpsychick/docker-influxdb/) 
+
+[![Contributors](https://img.shields.io/github/contributors/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/graphs/contributors) [![GitHub last commit (branch)](https://img.shields.io/github/last-commit/drpsychick/docker-telegraf/master.svg)](https://github.com/drpsychick/docker-telegraf) [![license](https://img.shields.io/github/license/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/blob/master/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/issues) [![GitHub closed issues](https://img.shields.io/github/issues-closed/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/issues?q=is%3Aissue+is%3Aclosed) [![GitHub pull requests](https://img.shields.io/github/issues-pr/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/pulls) [![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/pulls?q=is%3Apr+is%3Aclosed)
+
+
 based on telegraf:alpine docker image
 
 Purpose:
