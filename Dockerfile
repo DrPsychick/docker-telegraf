@@ -1,9 +1,7 @@
-FROM telegraf:alpine
+ARG ALPINE_VERSION=alpine
+FROM telegraf:$ALPINE_VERSION
 
-COPY default.env /
-COPY envreplace.sh /
-COPY telegraf.conf.tmpl /
-
+COPY default.env envreplace.sh telegraf.conf.tmpl /
 RUN chmod +x /envreplace.sh
 
 ENTRYPOINT ["/envreplace.sh"]
