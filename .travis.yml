@@ -28,7 +28,7 @@ script:
 
 after_success:
   - >
-    test $TRAVIS_BRANCH = "master" && {
+    [ $TRAVIS_BRANCH = "master" -a $TRAVIS_PULL_REQUEST = "false" ] && {
     if [ "$ALPINE_VERSION" != "alpine" ]; then 
     branch="${ALPINE_VERSION}";
     exists="$(test -n "$(git branch -r |grep "$branch")" && echo "exists" || echo "missing")";
