@@ -1,0 +1,45 @@
+language: bash
+services: docker
+
+env:
+  global:
+  - IMAGE=drpsychick/docker-telegraf
+  matrix:
+  - ALPINE_VERSION=alpine
+  - ALPINE_VERSION=1.9.2-alpine
+  - ALPINE_VERSION=1.8.3-alpine
+
+before_script:
+  - docker build -t test --build-arg ALPINE_VERSION=$ALPINE_VERSION .
+  - VERSION=$(docker run --rm test telegraf version |awk '$1 == "Telegraf" { print $2; exit }' |tr -d 'v')
+  - eval $(ssh-agent -s)
+  - echo "$DEPLOY_PRIVATE_KEY" | ssh-add - && ssh-add -l
+  - git config --global user.email "github@drsick.net"
+  - git config --global user.name "TAG bot"
+  - git remote set-url origin "git@github.com:DrPsychick/docker-telegraf.git"
+
+
+script:
+  # test always passes
+  - echo "Alpine $ALPINE_VERSION telegraf $VERSION"
+  - >
+    echo "Running tests...";
+    docker run test telegraf version
+
+after_success:
+  - >
+    test $TRAVIS_BRANCH = "master" && {
+    if [ "$ALPINE_VERSION" != "alpine" ]; then 
+    branch="${ALPINE_VERSION}";
+    exists="$(test -n "$(git branch -r |grep "$branch")" && echo "exists" || echo "missing")";
+    echo "Branch: $branch ($exists)";
+    if [ "$exists" == "missing" ]; then
+    git checkout -b $branch;
+    sed -i -e "s/ALPINE_VERSION=.*/ALPINE_VERSION=$ALPINE_VERSION/" Dockerfile;
+    git diff Dockerfile;
+    docker build -t $IMAGE:$branch --build-arg ALPINE_VERSION=$ALPINE_VERSION . || exit 1;
+    git add Dockerfile && git commit -m "automated tag branch $branch" && git push -u origin $branch;
+    git tag $branch && git push --tags;
+    fi;
+    fi
+    }
