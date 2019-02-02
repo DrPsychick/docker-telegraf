@@ -3,20 +3,39 @@ services: docker
 
 env:
   global:
-  - IMAGE=drpsychick/docker-telegraf
+    - IMAGE=drpsychick/docker-telegraf
   matrix:
-  - ALPINE_VERSION=alpine
-  - ALPINE_VERSION=1.9.2-alpine
-  - ALPINE_VERSION=1.8.3-alpine
+    - ALPINE_VERSION=alpine DOCKER_TAG=latest
+    - ALPINE_VERSION=1.9.2-alpine
+    - ALPINE_VERSION=1.8.3-alpine
 
 before_script:
-  - docker build -t test --build-arg ALPINE_VERSION=$ALPINE_VERSION .
+  # set tag for develop and version branches (master -> latest, develop -> dev, $version -> $version)
+  - >
+    if [ "$TRAVIS_BRANCH" = "develop" -a "$DOCKER_TAG" = "latest" ]; then
+    export DOCKER_TAG="dev";
+    elseif [ "$TRAVIS_TAG" = "$ALPINE_VERSION" ]; then
+    export DOCKER_TAG="$ALPINE_VERSION";
+    fi
+  - >
+    docker pull $IMAGE:$TAG &&
+    build_id=$(docker inspect --format {{.Id}} $IMAGE:$TAG)
+  - >
+    docker build -t test --build-arg ALPINE_VERSION=$ALPINE_VERSION . &&
+    new_build_id=$(docker inspect --format {{.Id}} test)
+  - IMAGE_CHANGED=$(test "$new_build_id" = "$build_id" && echo "0" || echo "1")
   - VERSION=$(docker run --rm test telegraf version |awk '$1 == "Telegraf" { print $2; exit }' |tr -d 'v')
-  - eval $(ssh-agent -s)
-  - echo "$DEPLOY_PRIVATE_KEY" | ssh-add - && ssh-add -l
-  - git config --global user.email "github@drsick.net"
-  - git config --global user.name "TAG bot"
-  - git remote set-url origin "git@github.com:DrPsychick/docker-telegraf.git"
+  - >
+    eval $(ssh-agent -s) &&
+    echo "$DEPLOY_PRIVATE_KEY" | ssh-add - && ssh-add -l
+  - >
+    git config --global user.email "github@drsick.net";
+    git config --global user.name "TAG bot";
+    git remote set-url origin "git@github.com:DrPsychick/docker-telegraf.git"
+  - >
+    echo "image $IMAGE:$TAG based on $ALPINE_VERSION branch $TRAVIS_BRANCH";
+    echo "image changed: $IMAGE_CHANGED - version: $VERSION";
+    echo -e "build_id: $build_id\nnew_build_id: $new_build_id"
 
 
 script:
@@ -27,10 +46,22 @@ script:
     docker run test telegraf version
 
 after_success:
+  # trigger docker hub 'dev' build
   - >
-    [ $TRAVIS_BRANCH = "master" -a $TRAVIS_PULL_REQUEST = "false" ] && {
-    if [ "$ALPINE_VERSION" != "alpine" ]; then 
-    branch="${ALPINE_VERSION}";
+    if [ "$TRAVIS_BRANCH" = "develop" -a $IMAGE_CHANGED -eq 1 ]; then
+    curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "develop"}'
+    -X POST "$DOCKERHUB_TRIGGER";
+    fi
+  # trigger docker hub 'latest' build
+  # create and push new branch+tag when new version emerges
+  # issue: never triggers rebuild of a branch - how to detect changes?
+  - >
+    if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    if [ "$ALPINE_VERSION" = "alpine" -a $IMAGE_CHANGED -eq 1 ]; then
+    curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "master"}'
+    -X POST "$DOCKERHUB_TRIGGER";
+    else
+    branch="$ALPINE_VERSION";
     exists="$(test -n "$(git branch -r |grep "$branch")" && echo "exists" || echo "missing")";
     echo "Branch: $branch ($exists)";
     if [ "$exists" == "missing" ]; then
@@ -41,5 +72,5 @@ after_success:
     git add Dockerfile && git commit -m "automated tag branch $branch" && git push -u origin $branch;
     git tag $branch && git push --tags;
     fi;
+    fi;
     fi
-    }
