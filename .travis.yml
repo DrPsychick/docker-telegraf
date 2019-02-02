@@ -10,19 +10,7 @@ env:
     - ALPINE_VERSION=1.8.3-alpine
 
 before_script:
-  # set correct docker tag (develop -> only builds branches, does not commit)
-  - >
-    [ "$TRAVIS_BRANCH" = "develop" ] && export DOCKER_TAG="dev";
-    [ "$TRAVIS_BRANCH" = "master" ] && export DOCKER_TAG="latest";
-    [ "$ALPINE_VERSION" != "alpine" ] && export DOCKER_TAG="$ALPINE_VERSION";
-    echo "image $IMAGE:$DOCKER_TAG based on $ALPINE_VERSION branch $TRAVIS_BRANCH"
-  - >
-    docker pull $IMAGE:$DOCKER_TAG &&
-    export build_id=$(docker inspect --format {{.Id}} $IMAGE:$DOCKER_TAG)
-  - >
-    docker build -t test --build-arg ALPINE_VERSION=$ALPINE_VERSION . &&
-    export new_build_id=$(docker inspect --format {{.Id}} test)
-  - export IMAGE_CHANGED=$(test "$new_build_id" = "$build_id" && echo "0" || echo "1")
+  - docker build -t test --build-arg ALPINE_VERSION=$ALPINE_VERSION .
   - export VERSION=$(docker run --rm test telegraf version |awk '$1 == "Telegraf" { print $2; exit }' |tr -d 'v')
   - >
     eval $(ssh-agent -s) &&
@@ -32,9 +20,7 @@ before_script:
     git config --global user.name "TAG bot";
     git remote set-url origin "git@github.com:DrPsychick/docker-telegraf.git"
   - >
-    echo "image $IMAGE:$DOCKER_TAG based on $ALPINE_VERSION branch $TRAVIS_BRANCH";
-    echo "image changed: $IMAGE_CHANGED - version: $VERSION";
-    echo -e "build_id: $build_id\nnew_build_id: $new_build_id"
+    echo "image $IMAGE, git branch $TRAVIS_BRANCH based on telegraf:$ALPINE_VERSION";
 
 
 script:
@@ -47,7 +33,7 @@ script:
 after_success:
   # trigger docker hub 'dev' build
   - >
-    if [ "$TRAVIS_BRANCH" = "develop" -a $IMAGE_CHANGED -eq 1 ]; then
+    if [ "$TRAVIS_BRANCH" = "develop" ]; then
     curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "develop"}'
     -X POST "$DOCKERHUB_TRIGGER";
     fi
@@ -56,7 +42,7 @@ after_success:
   # issue: never triggers rebuild of a branch - how to detect changes?
   - >
     if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
-    if [ "$ALPINE_VERSION" = "alpine" -a $IMAGE_CHANGED -eq 1 ]; then
+    if [ "$ALPINE_VERSION" = "alpine" ]; then
     curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "master"}'
     -X POST "$DOCKERHUB_TRIGGER";
     else
