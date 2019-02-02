@@ -1,22 +1,27 @@
+dist: xenial
 language: bash
 services: docker
 
 env:
   global:
-  - IMAGE=drpsychick/docker-telegraf
+    - IMAGE=drpsychick/docker-telegraf
   matrix:
-  - ALPINE_VERSION=alpine
-  - ALPINE_VERSION=1.9.2-alpine
-  - ALPINE_VERSION=1.8.3-alpine
+    - ALPINE_VERSION=alpine
+    - ALPINE_VERSION=1.9.2-alpine
+    - ALPINE_VERSION=1.8.3-alpine
 
 before_script:
   - docker build -t test --build-arg ALPINE_VERSION=$ALPINE_VERSION .
-  - VERSION=$(docker run --rm test telegraf version |awk '$1 == "Telegraf" { print $2; exit }' |tr -d 'v')
-  - eval $(ssh-agent -s)
-  - echo "$DEPLOY_PRIVATE_KEY" | ssh-add - && ssh-add -l
-  - git config --global user.email "github@drsick.net"
-  - git config --global user.name "TAG bot"
-  - git remote set-url origin "git@github.com:DrPsychick/docker-telegraf.git"
+  - export VERSION=$(docker run --rm test telegraf version |awk '$1 == "Telegraf" { print $2; exit }' |tr -d 'v')
+  - >
+    eval $(ssh-agent -s) &&
+    echo "$DEPLOY_PRIVATE_KEY" | ssh-add - && ssh-add -l
+  - >
+    git config --global user.email "github@drsick.net";
+    git config --global user.name "TAG bot";
+    git remote set-url origin "git@github.com:DrPsychick/docker-telegraf.git"
+  - >
+    echo "image $IMAGE, git branch $TRAVIS_BRANCH based on telegraf:$ALPINE_VERSION";
 
 
 script:
@@ -27,10 +32,22 @@ script:
     docker run test telegraf version
 
 after_success:
+  # trigger docker hub 'dev' build
   - >
-    test $TRAVIS_BRANCH = "master" && {
-    if [ "$ALPINE_VERSION" != "alpine" ]; then 
-    branch="${ALPINE_VERSION}";
+    if [ "$TRAVIS_BRANCH" = "develop" -a "$ALPINE_VERSION" = "alpine" ]; then
+    curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "develop"}'
+    -X POST "$DOCKERHUB_TRIGGER";
+    fi
+  # trigger docker hub 'latest' build
+  # create and push new branch+tag when new version emerges
+  # issue: never triggers rebuild of a branch - how to detect changes?
+  - >
+    if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    if [ "$ALPINE_VERSION" = "alpine" ]; then
+    curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "master"}'
+    -X POST "$DOCKERHUB_TRIGGER";
+    else
+    branch="$ALPINE_VERSION";
     exists="$(test -n "$(git branch -r |grep "$branch")" && echo "exists" || echo "missing")";
     echo "Branch: $branch ($exists)";
     if [ "$exists" == "missing" ]; then
@@ -41,5 +58,5 @@ after_success:
     git add Dockerfile && git commit -m "automated tag branch $branch" && git push -u origin $branch;
     git tag $branch && git push --tags;
     fi;
+    fi;
     fi
-    }
