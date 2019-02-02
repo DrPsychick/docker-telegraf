@@ -34,7 +34,7 @@ script:
 after_success:
   # trigger docker hub 'dev' build
   - >
-    if [ "$TRAVIS_BRANCH" = "develop" ]; then
+    if [ "$TRAVIS_BRANCH" = "develop" -a "$ALPINE_VERSION" = "alpine" ]; then
     curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "develop"}'
     -X POST "$DOCKERHUB_TRIGGER";
     fi
