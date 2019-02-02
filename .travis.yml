@@ -16,15 +16,16 @@ before_script:
     export DOCKER_TAG="dev";
     elif [ "$TRAVIS_TAG" = "$ALPINE_VERSION" ]; then
     export DOCKER_TAG="$ALPINE_VERSION";
-    fi
-  - >
+    fi;
+    echo "image $IMAGE:$DOCKER_TAG based on $ALPINE_VERSION branch $TRAVIS_BRANCH";
+- >
     docker pull $IMAGE:$DOCKER_TAG &&
-    build_id=$(docker inspect --format {{.Id}} $IMAGE:$DOCKER_TAG)
+    export build_id=$(docker inspect --format {{.Id}} $IMAGE:$DOCKER_TAG)
   - >
     docker build -t test --build-arg ALPINE_VERSION=$ALPINE_VERSION . &&
-    new_build_id=$(docker inspect --format {{.Id}} test)
-  - IMAGE_CHANGED=$(test "$new_build_id" = "$build_id" && echo "0" || echo "1")
-  - VERSION=$(docker run --rm test telegraf version |awk '$1 == "Telegraf" { print $2; exit }' |tr -d 'v')
+    export new_build_id=$(docker inspect --format {{.Id}} test)
+  - export IMAGE_CHANGED=$(test "$new_build_id" = "$build_id" && echo "0" || echo "1")
+  - export VERSION=$(docker run --rm test telegraf version |awk '$1 == "Telegraf" { print $2; exit }' |tr -d 'v')
   - >
     eval $(ssh-agent -s) &&
     echo "$DEPLOY_PRIVATE_KEY" | ssh-add - && ssh-add -l
