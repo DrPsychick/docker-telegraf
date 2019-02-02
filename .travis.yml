@@ -5,18 +5,16 @@ env:
   global:
     - IMAGE=drpsychick/docker-telegraf
   matrix:
-    - ALPINE_VERSION=alpine DOCKER_TAG=latest
+    - ALPINE_VERSION=alpine
     - ALPINE_VERSION=1.9.2-alpine
     - ALPINE_VERSION=1.8.3-alpine
 
 before_script:
-  # set tag for develop and version branches (master -> latest, develop -> dev, $version -> $version)
+  # set correct docker tag (develop -> only builds branches, does not commit)
   - >
-    if [ "$TRAVIS_BRANCH" = "develop" -a "$DOCKER_TAG" = "latest" ]; then
-    export DOCKER_TAG="dev";
-    elif [ "$TRAVIS_TAG" = "$ALPINE_VERSION" ]; then
-    export DOCKER_TAG="$ALPINE_VERSION";
-    fi;
+    [ "$TRAVIS_BRANCH" = "develop" ] && export DOCKER_TAG="dev";
+    [ "$TRAVIS_BRANCH" = "master" ] && export DOCKER_TAG="latest";
+    [ "$ALPINE_VERSION" != "alpine" ] && export DOCKER_TAG="$ALPINE_VERSION";
     echo "image $IMAGE:$DOCKER_TAG based on $ALPINE_VERSION branch $TRAVIS_BRANCH"
   - >
     docker pull $IMAGE:$DOCKER_TAG &&
