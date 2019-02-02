@@ -13,7 +13,7 @@ env:
 before_script:
   - >
     [ -z "$DEPLOY_PRIVATE_KEY" -o -z "$DOCKERHUB_TRIGGER" ] &&
-    (echo "missing travis environment variables!"; exit 1)
+    (echo "missing travis environment variables"; exit 1)
   - docker build -t test --build-arg ALPINE_VERSION=$ALPINE_VERSION .
   - export VERSION=$(docker run --rm test telegraf version |awk '$1 == "Telegraf" { print $2; exit }' |tr -d 'v')
   - >
