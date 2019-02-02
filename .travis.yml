@@ -14,7 +14,7 @@ before_script:
   - >
     if [ "$TRAVIS_BRANCH" = "develop" -a "$DOCKER_TAG" = "latest" ]; then
     export DOCKER_TAG="dev";
-    elseif [ "$TRAVIS_TAG" = "$ALPINE_VERSION" ]; then
+    elif [ "$TRAVIS_TAG" = "$ALPINE_VERSION" ]; then
     export DOCKER_TAG="$ALPINE_VERSION";
     fi
   - >
