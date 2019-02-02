@@ -17,8 +17,8 @@ before_script:
     elif [ "$TRAVIS_TAG" = "$ALPINE_VERSION" ]; then
     export DOCKER_TAG="$ALPINE_VERSION";
     fi;
-    echo "image $IMAGE:$DOCKER_TAG based on $ALPINE_VERSION branch $TRAVIS_BRANCH";
-- >
+    echo "image $IMAGE:$DOCKER_TAG based on $ALPINE_VERSION branch $TRAVIS_BRANCH"
+  - >
     docker pull $IMAGE:$DOCKER_TAG &&
     export build_id=$(docker inspect --format {{.Id}} $IMAGE:$DOCKER_TAG)
   - >
