@@ -18,8 +18,8 @@ before_script:
     export DOCKER_TAG="$ALPINE_VERSION";
     fi
   - >
-    docker pull $IMAGE:$TAG &&
-    build_id=$(docker inspect --format {{.Id}} $IMAGE:$TAG)
+    docker pull $IMAGE:$DOCKER_TAG &&
+    build_id=$(docker inspect --format {{.Id}} $IMAGE:$DOCKER_TAG)
   - >
     docker build -t test --build-arg ALPINE_VERSION=$ALPINE_VERSION . &&
     new_build_id=$(docker inspect --format {{.Id}} test)
@@ -33,7 +33,7 @@ before_script:
     git config --global user.name "TAG bot";
     git remote set-url origin "git@github.com:DrPsychick/docker-telegraf.git"
   - >
-    echo "image $IMAGE:$TAG based on $ALPINE_VERSION branch $TRAVIS_BRANCH";
+    echo "image $IMAGE:$DOCKER_TAG based on $ALPINE_VERSION branch $TRAVIS_BRANCH";
     echo "image changed: $IMAGE_CHANGED - version: $VERSION";
     echo -e "build_id: $build_id\nnew_build_id: $new_build_id"
 
