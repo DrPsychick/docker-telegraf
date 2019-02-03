@@ -47,10 +47,12 @@ after_success:
     -X POST "$DOCKERHUB_TRIGGER";
     else
     branch="$ALPINE_VERSION";
-    echo "Create local branch: $branch";
+    echo "Branch: $branch";
+    if [ -z "$(git branch -r |grep "$branch")" ]; then
     git checkout -b $branch;
-    echo "Pull from remote, if it exists:";
-    [ -n "$(git branch -r |grep "$branch")" ] && git pull origin $branch;
+    else
+    git checkout --track origin/$branch;
+    fi;
     git merge -X theirs --no-edit --commit master;
     sed -i -e "s/ALPINE_VERSION=.*/ALPINE_VERSION=$ALPINE_VERSION/" Dockerfile;
     git diff Dockerfile;
