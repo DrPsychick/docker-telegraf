@@ -48,15 +48,15 @@ after_success:
     -X POST "$DOCKERHUB_TRIGGER";
     else
     branch="$ALPINE_VERSION";
-    exists="$(test -n "$(git branch -r |grep "$branch")" && echo "exists" || echo "missing")";
-    echo "Branch: $branch ($exists)";
-    if [ "$exists" == "missing" ]; then
-    git checkout -b $branch;
+    create="$([ -z "$(git branch -r |grep "$branch")" ] && echo "-b " || echo "--track origin/")";
+    echo "Branch: $create $branch";
+    git checkout --track origin/master;
+    git checkout $create$branch;
+    git merge -X theirs master;
+    git diff;
     sed -i -e "s/ALPINE_VERSION=.*/ALPINE_VERSION=$ALPINE_VERSION/" Dockerfile;
     git diff Dockerfile;
     docker build -t $IMAGE:$branch --build-arg ALPINE_VERSION=$ALPINE_VERSION . || exit 1;
-    git add Dockerfile && git commit -m "automated tag branch $branch" && git push -u origin $branch;
-    git tag $branch && git push --tags;
-    fi;
+    git add Dockerfile && git commit -m "automated 'merge master' on $branch" && git push -u origin $branch;
     fi;
     fi
