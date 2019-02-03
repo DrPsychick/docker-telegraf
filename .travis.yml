@@ -39,8 +39,7 @@ after_success:
     -X POST "$DOCKERHUB_TRIGGER";
     fi
   # trigger docker hub 'latest' build
-  # create and push new branch+tag when new version emerges
-  # issue: never triggers rebuild of a branch - how to detect changes?
+  # create or update new branch from master for each version, push will trigger docker hub build
   - >
     if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
     if [ "$ALPINE_VERSION" = "alpine" ]; then
@@ -49,14 +48,14 @@ after_success:
     else
     branch="$ALPINE_VERSION";
     create="$([ -z "$(git branch -r |grep "$branch")" ] && echo "-b " || echo "--track origin/")";
-    echo "Branch: $create $branch";
+    echo "Branch: $create$branch";
     git checkout --track origin/master;
     git checkout $create$branch;
-    git merge -X theirs master;
-    git diff;
+    git merge -X theirs --no-edit --commit master;
     sed -i -e "s/ALPINE_VERSION=.*/ALPINE_VERSION=$ALPINE_VERSION/" Dockerfile;
     git diff Dockerfile;
     docker build -t $IMAGE:$branch --build-arg ALPINE_VERSION=$ALPINE_VERSION . || exit 1;
-    git add Dockerfile && git commit -m "automated 'merge master' on $branch" && git push -u origin $branch;
+    git add Dockerfile && git commit -m "automated build on $branch";
+    git push -u origin $branch;
     fi;
     fi
