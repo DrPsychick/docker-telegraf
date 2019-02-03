@@ -48,11 +48,7 @@ after_success:
     else
     branch="$ALPINE_VERSION";
     echo "Branch: $branch";
-    if [ -z "$(git branch -r |grep "$branch")" ]; then
-    git checkout -b $branch;
-    else
-    git checkout --track origin/$branch;
-    fi;
+    git checkout --track origin/$branch 2>/dev/null || git checkout -b $branch;
     git merge -X theirs --no-edit --commit master;
     sed -i -e "s/ALPINE_VERSION=.*/ALPINE_VERSION=$ALPINE_VERSION/" Dockerfile;
     git diff Dockerfile;
