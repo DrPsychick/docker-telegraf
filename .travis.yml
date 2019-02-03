@@ -49,7 +49,6 @@ after_success:
     branch="$ALPINE_VERSION";
     create="$([ -z "$(git branch -r |grep "$branch")" ] && echo "-b " || echo "--track origin/")";
     echo "Branch: $create$branch";
-    git checkout --track origin/master;
     git checkout $create$branch;
     git merge -X theirs --no-edit --commit master;
     sed -i -e "s/ALPINE_VERSION=.*/ALPINE_VERSION=$ALPINE_VERSION/" Dockerfile;
