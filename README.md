@@ -7,7 +7,7 @@
 
 based on telegraf:alpine docker image
 
-Purpose:
+## Purpose
 * make it fully configurable through environment variables
 * use one image to run them all
 * run stateless, environment configured containers (see https://12factor.net/)
