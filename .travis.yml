@@ -57,7 +57,7 @@ after_success:
     git commit -a -m "automated build on $branch";
     ret=$?;
     git push -u origin $branch;
-    if [ $? -ne 0 ]; then
+    if [ $ret -ne 0 ]; then
     curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "'$branch'"}'
     -X POST "$DOCKERHUB_TRIGGER";
     fi;
