@@ -29,7 +29,7 @@ script:
   - echo "Alpine $ALPINE_VERSION telegraf $VERSION"
   - >
     echo "Running tests...";
-    docker run test telegraf version
+    docker run test telegraf --test
 
 after_success:
   # trigger docker hub 'dev' build
@@ -50,11 +50,11 @@ after_success:
     echo "Branch: $branch";
     git checkout -b $branch;
     git pull origin $branch;
-    git merge -X theirs --no-edit --commit master;
+    git merge -X theirs --no-edit --no-commit master;
     sed -i -e "s/ALPINE_VERSION=.*/ALPINE_VERSION=$ALPINE_VERSION/" Dockerfile;
     git diff Dockerfile;
     docker build -t $IMAGE:$branch --build-arg ALPINE_VERSION=$ALPINE_VERSION . || exit 1;
-    git add Dockerfile && git commit -m "automated build on $branch";
+    git commit -a -m "automated build on $branch";
     git push -u origin $branch;
     fi;
     fi

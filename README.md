@@ -1,6 +1,6 @@
-# [Docker image: docker-telegraf](https://hub.docker.com/r/drpsychick/docker-telegraf/)
+# [Docker image: telegraf](https://hub.docker.com/r/drpsychick/telegraf/)
 
-[![DockerHub build status](https://img.shields.io/docker/build/drpsychick/docker-telegraf.svg)](https://hub.docker.com/r/drpsychick/docker-telegraf/builds/) [![DockerHub build](https://img.shields.io/docker/automated/drpsychick/docker-telegraf.svg)](https://hub.docker.com/r/drpsychick/docker-telegraf/builds/) [![DockerHub pulls](https://img.shields.io/docker/pulls/drpsychick/docker-telegraf.svg)](https://hub.docker.com/r/drpsychick/docker-telegraf/) [![GitHub stars](https://img.shields.io/github/stars/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf) [![DockerHub stars](https://img.shields.io/docker/stars/drpsychick/docker-telegraf.svg)](https://hub.docker.com/r/drpsychick/docker-telegraf/) 
+[![DockerHub build status](https://img.shields.io/docker/cloud/build/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/builds/) [![DockerHub build](https://img.shields.io/docker/cloud/automated/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/builds/) [![DockerHub pulls](https://img.shields.io/docker/pulls/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/) [![GitHub stars](https://img.shields.io/github/stars/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf) [![DockerHub stars](https://img.shields.io/docker/stars/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/) 
 
 [![Contributors](https://img.shields.io/github/contributors/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/graphs/contributors) [![GitHub last commit (branch)](https://img.shields.io/github/last-commit/drpsychick/docker-telegraf/master.svg)](https://github.com/drpsychick/docker-telegraf) [![license](https://img.shields.io/github/license/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/blob/master/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/issues) [![GitHub closed issues](https://img.shields.io/github/issues-closed/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/issues?q=is%3Aissue+is%3Aclosed) [![GitHub pull requests](https://img.shields.io/github/issues-pr/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/pulls) [![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/pulls?q=is%3Apr+is%3Aclosed)
 
@@ -18,8 +18,8 @@ Try it in 3 steps
 
 ### 1 create your own telegraf.env
 ```
-docker run --rm -it drpsychick/docker-telegraf:latest --test
-docker run --rm -it drpsychick/docker-telegraf:latest --export > telegraf.env
+docker run --rm -it drpsychick/telegraf:latest --test
+docker run --rm -it drpsychick/telegraf:latest --export > telegraf.env
 ```
 
 ### 2 configure it
@@ -32,9 +32,9 @@ TEL_OUTPUTS_INFLUXDB_URLS=urls = ["http://yourinfluxhost:8086"]
 ### 3 test and run it
 Run in a separate teminal
 ```
-docker run --rm -it --cap-add NET_ADMIN --env-file telegraf.env --name telegraf-1 drpsychick/docker-telegraf:latest --test
-docker run --rm -it --cap-add NET_ADMIN --env-file telegraf.env --name telegraf-1 drpsychick/docker-telegraf:latest telegraf --test
-docker run --rm -it --cap-add NET_ADMIN --env-file telegraf.env --name telegraf-1 drpsychick/docker-telegraf:latest
+docker run --rm -it --cap-add NET_ADMIN --env-file telegraf.env --name telegraf-1 drpsychick/telegraf:latest --test
+docker run --rm -it --cap-add NET_ADMIN --env-file telegraf.env --name telegraf-1 drpsychick/telegraf:latest telegraf --test
+docker run --rm -it --cap-add NET_ADMIN --env-file telegraf.env --name telegraf-1 drpsychick/telegraf:latest
 ```
 
 Check your influxdb for new input
