@@ -55,6 +55,11 @@ after_success:
     git diff Dockerfile;
     docker build -t $IMAGE:$branch --build-arg ALPINE_VERSION=$ALPINE_VERSION . || exit 1;
     git commit -a -m "automated build on $branch";
+    ret=$?;
     git push -u origin $branch;
+    if [ $? -ne 0 ]; then
+    curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "'$branch'"}'
+    -X POST "$DOCKERHUB_TRIGGER";
+    fi;
     fi;
     fi
