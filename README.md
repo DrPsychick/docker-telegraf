@@ -1,8 +1,8 @@
 # [Docker image: telegraf](https://hub.docker.com/r/drpsychick/telegraf/)
 
-[![DockerHub build status](https://img.shields.io/docker/cloud/build/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/builds/) [![DockerHub build](https://img.shields.io/docker/cloud/automated/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/builds/) [![DockerHub pulls](https://img.shields.io/docker/pulls/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/) [![GitHub stars](https://img.shields.io/github/stars/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf) [![DockerHub stars](https://img.shields.io/docker/stars/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/) 
+[![Docker image](https://img.shields.io/docker/image-size/drpsychick/telegraf?sort=date)](https://hub.docker.com/r/drpsychick/telegraf/tags) [![DockerHub build status](https://img.shields.io/docker/cloud/build/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/builds/) [![DockerHub pulls](https://img.shields.io/docker/pulls/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/) [![GitHub stars](https://img.shields.io/github/stars/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf) [![DockerHub stars](https://img.shields.io/docker/stars/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/) [![Contributors](https://img.shields.io/github/contributors/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/graphs/contributors)
 
-[![Contributors](https://img.shields.io/github/contributors/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/graphs/contributors) [![GitHub last commit (branch)](https://img.shields.io/github/last-commit/drpsychick/docker-telegraf/master.svg)](https://github.com/drpsychick/docker-telegraf) [![license](https://img.shields.io/github/license/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/blob/master/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/issues) [![GitHub closed issues](https://img.shields.io/github/issues-closed/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/issues?q=is%3Aissue+is%3Aclosed) [![GitHub pull requests](https://img.shields.io/github/issues-pr/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/pulls) [![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/pulls?q=is%3Apr+is%3Aclosed)
+[![GitHub last commit (branch)](https://img.shields.io/github/last-commit/drpsychick/docker-telegraf/master.svg)](https://github.com/drpsychick/docker-telegraf) [![license](https://img.shields.io/github/license/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/blob/master/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/issues) [![GitHub closed issues](https://img.shields.io/github/issues-closed/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/issues?q=is%3Aissue+is%3Aclosed) [![GitHub pull requests](https://img.shields.io/github/issues-pr/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/pulls) [![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf/pulls?q=is%3Apr+is%3Aclosed)
 
 
 based on telegraf:alpine docker image
@@ -28,6 +28,18 @@ Edit at least your hostname and output (influxdb or sth. else) in `telegraf.env`
 TEL_AGENT_HOSTNAME=hostname = "myhostname"
 TEL_OUTPUTS_INFLUXDB_URLS=urls = ["http://yourinfluxhost:8086"]
 ```
+
+You can add as many variables as you want for more inputs and their configuration, there are only a few rules:
+1. the variable must start with a known prefix (the `conf_vars_telegrafconf` variable in `default.env`) 
+2. the value must be a single row (can contain `\n` though) - due to Docker environment variables restrictions
+3. if you use multiple variables to build an ordered section, be sure that the alphabetical order is correct.
+
+For more examples see `default.env`
+```
+TEL_INPUTS_CPU_0=[[inputs.cpu]]
+TEL_INPUTS_CPU_FLAGS=percpu = true\ntotalcpu = true\ncollect_cpu_time = false\nreport_active = false
+```
+The `envreplace.sh` script will take the configured prefixes in order and generate the configuration file from all matching variables one-by-one.
 
 ### 3 test and run it
 Run in a separate teminal
