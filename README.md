@@ -29,6 +29,16 @@ TEL_AGENT_HOSTNAME=hostname = "myhostname"
 TEL_OUTPUTS_INFLUXDB_URLS=urls = ["http://yourinfluxhost:8086"]
 ```
 
+You can add as many variables as you want for more inputs and their configuration, there are only a few rules:
+1. the variable must start with `TEL_` (the prefix) and must be a single row (can contain `\n` though)
+2. if you use multiple variables to build an ordered section, be sure that the alphabetical order is correct.
+
+For more examples see `default.env`
+```
+TEL_INPUTS_CPU_0=[[inputs.cpu]]
+TEL_INPUTS_CPU_FLAGS=percpu = true\ntotalcpu = true\ncollect_cpu_time = false\nreport_active = false
+```
+
 ### 3 test and run it
 Run in a separate teminal
 ```
