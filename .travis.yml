@@ -9,7 +9,7 @@ sudo: required
 
 env:
   global:
-    - IMAGE=drpsychick/docker-telegraf
+    - IMAGE=drpsychick/telegraf
     - PLATFORMS=linux/amd64  #,linux/arm64,linux/arm/v7,linux/arm64/v8
     - DOCKER_CLI_EXPERIMENTAL=enabled
   matrix:
