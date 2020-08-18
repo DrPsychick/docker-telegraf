@@ -1,65 +1,46 @@
-dist: xenial
-language: bash
-services: docker
+dist: bionic
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable'
+        key_url: 'https://download.docker.com/linux/ubuntu/gpg'
+    update: true
+sudo: required
 
 env:
   global:
     - IMAGE=drpsychick/docker-telegraf
+    - PLATFORMS=linux/amd64  #,linux/arm64,linux/arm/v7,linux/arm64/v8
+    - DOCKER_CLI_EXPERIMENTAL=enabled
   matrix:
-    - ALPINE_VERSION=alpine
-    - ALPINE_VERSION=1.9.2-alpine
-    - ALPINE_VERSION=1.8.3-alpine
+    - TELEGRAF_VERSION=alpine
+    - TELEGRAF_VERSION=1.15-alpine
+    - TELEGRAF_VERSION=1.14-alpine
 
 before_script:
-  - docker build -t test --build-arg ALPINE_VERSION=$ALPINE_VERSION .
-  - export VERSION=$(docker run --rm test telegraf version |awk '$1 == "Telegraf" { print $2; exit }' |tr -d 'v')
-  - >
-    eval $(ssh-agent -s) &&
-    echo "$DEPLOY_PRIVATE_KEY" | ssh-add - && ssh-add -l
-  - >
-    git config --global user.email "github@drsick.net";
-    git config --global user.name "TAG bot";
-    git remote set-url origin "git@github.com:DrPsychick/docker-telegraf.git"
-  - >
-    echo "image $IMAGE, git branch $TRAVIS_BRANCH based on telegraf:$ALPINE_VERSION";
-
+  # upgrade to latest docker-ce from repo
+  - sudo apt-get -y install docker-ce
+  # enable experimental in docker daemon
+  - docker_conf=$(sudo cat /etc/docker/daemon.json |jq '. + {"experimental":"enabled"}')
+  - echo "$docker_conf" | sudo tee /etc/docker/daemon.json
+  - sudo service docker start
+  - docker version
+  - docker buildx version
+  # build the image for all platforms
+  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  - docker buildx create --name xbuilder --use
+  - docker buildx inspect --bootstrap
+  - docker buildx build --progress plain --platform $PLATFORMS --build-arg INLFUXDB_VERSION=$INFLUXDB_VERSION -t $IMAGE .
+  # load a single image for local tests, see https://github.com/docker/buildx/issues/59
+  - docker buildx build --progress plain --platform linux/amd64 -t $IMAGE --load .
+  - export ALPINE_VERSION=$(docker run --rm $IMAGE cat /etc/alpine-version)
 
 script:
   # test always passes
-  - echo "Alpine $ALPINE_VERSION telegraf $VERSION"
+  - echo "Alpine $ALPINE_VERSION telegraf $TELEGRAF_VERSION"
   - >
     echo "Running tests...";
-    docker run test telegraf --test
+    docker run $IMAGE telegraf --test
 
 after_success:
-  # trigger docker hub 'dev' build
-  - >
-    if [ "$TRAVIS_BRANCH" = "develop" -a "$ALPINE_VERSION" = "alpine" ]; then
-    curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "develop"}'
-    -X POST "$DOCKERHUB_TRIGGER";
-    fi
-  # trigger docker hub 'latest' build
-  # create or update new branch from master for each version, push will trigger docker hub build
-  - >
-    if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
-    if [ "$ALPINE_VERSION" = "alpine" ]; then
-    curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "master"}'
-    -X POST "$DOCKERHUB_TRIGGER";
-    else
-    branch="$ALPINE_VERSION";
-    echo "Branch: $branch";
-    git checkout -b $branch;
-    git pull origin $branch;
-    git merge -X theirs --no-edit --no-commit master;
-    sed -i -e "s/ALPINE_VERSION=.*/ALPINE_VERSION=$ALPINE_VERSION/" Dockerfile;
-    git diff Dockerfile;
-    docker build -t $IMAGE:$branch --build-arg ALPINE_VERSION=$ALPINE_VERSION . || exit 1;
-    git commit -a -m "automated build on $branch";
-    ret=$?;
-    git push -u origin $branch;
-    if [ $ret -ne 0 ]; then
-    curl -H "Content-Type: application/json" --data '{"source_type": "Branch", "source_name": "'$branch'"}'
-    -X POST "$DOCKERHUB_TRIGGER";
-    fi;
-    fi;
-    fi
+  - bash deploy.sh
