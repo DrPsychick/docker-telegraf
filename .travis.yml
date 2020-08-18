@@ -40,7 +40,7 @@ script:
   - echo "Alpine $ALPINE_VERSION telegraf $TELEGRAF_VERSION"
   - >
     echo "Running tests...";
-    docker run test telegraf --test
+    docker run $IMAGE telegraf --test
 
 after_success:
   - bash deploy.sh
