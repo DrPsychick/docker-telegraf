@@ -41,7 +41,8 @@ script:
   - echo "Alpine $ALPINE_VERSION telegraf $TELEGRAF_VERSION"
   - >
     echo "Running tests...";
-    docker run $IMAGE telegraf --test
+    docker run $IMAGE cat /default.env > telegraf.env
+    docker run --env-file telegraf.env $IMAGE telegraf --test
 
 after_success:
   - bash deploy.sh
