@@ -20,33 +20,33 @@ Try it in 3 steps
 
 ### 1 create your own telegraf.env
 ```
-docker run --rm -it drpsychick/telegraf:latest --test
-docker run --rm -it drpsychick/telegraf:latest --export > telegraf.env
+docker run --rm -it drpsychick/telegraf:latest cat /default.env > telegraf.env
 ```
 
 ### 2 configure it
 Edit at least your hostname and output (influxdb or sth. else) in `telegraf.env`:
 ```
-TEL_AGENT_HOSTNAME=hostname = "myhostname"
-TEL_OUTPUTS_INFLUXDB_URLS=urls = ["http://yourinfluxhost:8086"]
+TLG_AGENT_HOSTNAME=agent|hostname="myhostname"
+TLG_INFLUXDB_URL=[outputs.influxdb]|urls=["http://yourinfluxhost:8086"]
 ```
 
 You can add as many variables as you want for more inputs and their configuration, there are only a few rules:
-1. the variable must start with a known prefix (the `conf_vars_telegrafconf` variable in `default.env`) 
-2. the value must be a single row (can contain `\n` though) - due to Docker environment variables restrictions
-3. if you use multiple variables to build an ordered section, be sure that the alphabetical order is correct.
+1. the variable must start with a known prefix (the `CONF_PREFIX` variable in `default.env`) 
+2. the value must be a single row - due to Docker environment variables restrictions
+3. use one variable for each setting 
 
 For more examples see `default.env`
 ```
-TEL_INPUTS_CPU_0=[[inputs.cpu]]
-TEL_INPUTS_CPU_FLAGS=percpu = true\ntotalcpu = true\ncollect_cpu_time = false\nreport_active = false
+TLG_INPUTS_CPU_PERCPU=[inputs.cpu]|percpu=true
+TLG_INPUTS_CPU_TOTAL=[inputs.cpu]|totalcpu=true
+TLG_INPUTS_CPU_TIME=[inputs.cpu]|collect_cpu_time=false
+TLG_INPUTS_CPU_ACTIVE=[inputs.cpu]|report_active=false
 ```
-The `envreplace.sh` script will take the configured prefixes in order and generate the configuration file from all matching variables one-by-one.
+The `conf_update` tool will take the configured prefixes in order and update the configuration file from all matching variables one-by-one.
 
 ### 3 test and run it
 Run in a separate teminal
 ```
-docker run --rm -it --cap-add NET_ADMIN --env-file telegraf.env --name telegraf-1 drpsychick/telegraf:latest --test
 docker run --rm -it --cap-add NET_ADMIN --env-file telegraf.env --name telegraf-1 drpsychick/telegraf:latest telegraf --test
 docker run --rm -it --cap-add NET_ADMIN --env-file telegraf.env --name telegraf-1 drpsychick/telegraf:latest
 ```
@@ -54,15 +54,13 @@ docker run --rm -it --cap-add NET_ADMIN --env-file telegraf.env --name telegraf-
 Check your influxdb for new input
 
 ## Configure it to your needs
-You can use any `TEL_` variable in your `telegraf.env`. They will be added to the config during container startup.
+You can use any `TLG_` variable in your `telegraf.env`. They will be added to the config during container startup.
 
 ### Example 
 ```
-TEL_INPUTS_DISK_0=[[inputs.disk]]
-TEL_INPUTS_DISK_FLAGS=ignore_fs = ["tmpfs", "devtmpfs", "devfs"]
+TLG_INPUTS_DISK_FLAGS=[inputs.disk]|ignore_fs=["tmpfs", "devtmpfs", "devfs"]
 ```
 
 **Beware**:
 
 Docker only support *simple variables*. No ", no ' and especially no newlines in variables.
-To define a multiline variable, look at the `TEL_INPUTS_CPU_FLAGS` variable in the example output.
