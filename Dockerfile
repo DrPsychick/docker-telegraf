@@ -2,16 +2,19 @@ ARG TELEGRAF_VERSION=alpine
 FROM telegraf:$TELEGRAF_VERSION AS base
 
 FROM golang:alpine AS build
-COPY conf_update.go /
-RUN go build -o /conf_update /conf_update.go
+COPY toml_update.go /root
+RUN cd /root \
+    && go mod init github.com/drpsychick/docker-telegraf \
+    && go mod vendor \
+    && go build -o /root/toml_update /root/toml_update.go
 
 FROM base
-COPY --from=build /conf_update /
-COPY default.env conf_update.sh  /
-RUN chmod +x /conf_update.sh
+COPY --from=build /root/toml_update /
+COPY default.env toml_update.sh  /
+RUN chmod +x /toml_update.sh
 
 # required for inputs.iptables
 RUN apk add --no-cache iptables
 
-ENTRYPOINT ["/conf_update.sh"]
+ENTRYPOINT ["/toml_update.sh"]
 CMD ["telegraf"]

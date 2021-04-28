@@ -2,6 +2,6 @@
 
 set -e
 
-/conf_update
+/toml_update
 
 /entrypoint.sh $@

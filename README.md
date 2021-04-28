@@ -26,6 +26,22 @@ based on telegraf:alpine docker image
 
 ## Usage
 
+### **UPDATE 2021-04-28**
+**BC Breaking Change** in the environments:
+
+The image is now using a small go utility (`toml_update`) to read, modify and write a valid `toml` configuration file.
+```shell
+# before
+TEL_AGENT_HOSTNAME=hostname = "myhostname"
+TEL_OUTPUTS_INFLUXDB_URLS=urls = ["http://yourinfluxhost:8086"]
+TEL_INPUTS_CPU_FLAGS = "percpu = true\ntotalcpu = true"
+# after
+TEL_AGENT_NAMEDOESNOTMATTER=agent.hostname=myhostname
+TEL_REALLYDOESNOTMATTER=outputs.influxdb.urls=["https://yourinfluxhost:8086"]
+TEL_CPUFLAG1=inputs.cpu.percpu=true
+TEL_CPUFLAG2=inputs.cpu.totalcpu=true
+```
+
 Try it in 3 steps
 
 ### 1 create your own telegraf.env
@@ -36,8 +52,8 @@ docker run --rm -it drpsychick/telegraf:latest cat /default.env > telegraf.env
 ### 2 configure it
 Edit at least your hostname and output (influxdb or sth. else) in `telegraf.env`:
 ```
-TLG_AGENT_HOSTNAME=agent|hostname="myhostname"
-TLG_INFLUXDB_URL=[outputs.influxdb]|urls=["http://yourinfluxhost:8086"]
+TLG_AGENT_HOSTNAME=agent.hostname="myhostname"
+TLG_INFLUXDB_URL=outputs.influxdb.urls=["http://yourinfluxhost:8086"]
 ```
 
 You can add as many variables as you want for more inputs and their configuration, there are only a few rules:
@@ -47,12 +63,12 @@ You can add as many variables as you want for more inputs and their configuratio
 
 For more examples see `default.env`
 ```
-TLG_INPUTS_CPU_PERCPU=[inputs.cpu]|percpu=true
-TLG_INPUTS_CPU_TOTAL=[inputs.cpu]|totalcpu=true
-TLG_INPUTS_CPU_TIME=[inputs.cpu]|collect_cpu_time=false
-TLG_INPUTS_CPU_ACTIVE=[inputs.cpu]|report_active=false
+TLG_INPUTS_CPU_PERCPU=inputs.cpu.percpu=true
+TLG_INPUTS_CPU_TOTAL=inputs.cpu.totalcpu=true
+TLG_INPUTS_CPU_TIME=inputs.cpu.collect_cpu_time=false
+TLG_INPUTS_CPU_ACTIVE=inputs.cpu.report_active=false
 ```
-The `conf_update` tool will take the configured prefixes in order and update the configuration file from all matching variables one-by-one.
+The `toml_update` tool will take the configured prefixes in order and update the configuration file from all matching variables one-by-one.
 
 ### 3 test and run it
 Run in a separate teminal
@@ -68,7 +84,7 @@ You can use any `TLG_` variable in your `telegraf.env`. They will be added to th
 
 ### Example 
 ```
-TLG_INPUTS_DISK_FLAGS=[inputs.disk]|ignore_fs=["tmpfs", "devtmpfs", "devfs"]
+TLG_INPUTS_DISK_FLAGS=inputs.disk.ignore_fs=["tmpfs", "devtmpfs", "devfs"]
 ```
 
 **Beware**:
