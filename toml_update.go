@@ -78,7 +78,7 @@ func main() {
 	var conf_file = os.Getenv("CONF_UPDATE")
 	var prefix = os.Getenv("CONF_PREFIX")
 	if conf_file == "" || prefix == "" {
-        fmt.Println("No CONF_UPDATE or CONF_PREFIX defined - exiting.")
+        fmt.Println("# No CONF_UPDATE or CONF_PREFIX defined - exiting.")
 		os.Exit(0)
 	}
 
