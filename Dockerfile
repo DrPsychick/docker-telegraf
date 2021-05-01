@@ -13,8 +13,8 @@ COPY --from=build /root/toml_update /
 COPY default.env toml_update.sh  /
 RUN chmod +x /toml_update.sh
 
-# required for inputs.iptables
-RUN apk add --no-cache iptables
+# required for inputs.iptables and curl exec
+RUN apk add --no-cache curl iptables
 
 ENTRYPOINT ["/toml_update.sh"]
 CMD ["telegraf"]
