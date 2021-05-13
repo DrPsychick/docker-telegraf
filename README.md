@@ -32,10 +32,15 @@ based on telegraf:alpine docker image
 The image is now using a small go utility (`toml_update`) to read, modify and write a valid `toml` configuration file.
 ```shell
 # before
+conf_templates="telegraf.conf.tmpl:/etc/telegraf/telegraf.conf"
+conf_var_prefix=TEL_
+conf_vars_telegrafconf=${conf_vars_telegrafconf:-'TEL_GLOBAL_TAGS TEL_AGENT TEL_OUTPUTS TEL_PROCESSORS TEL_AGGREGATORS TEL_INPUTS'}
 TEL_AGENT_HOSTNAME=hostname = "myhostname"
 TEL_OUTPUTS_INFLUXDB_URLS=urls = ["http://yourinfluxhost:8086"]
 TEL_INPUTS_CPU_FLAGS = "percpu = true\ntotalcpu = true"
 # after
+CONF_UPDATE=/etc/telegraf/telegraf.con
+CONF_PREFIX=TEL
 TEL_AGENT_NAMEDOESNOTMATTER=agent.hostname=myhostname
 TEL_REALLYDOESNOTMATTER=outputs.influxdb.urls=["https://yourinfluxhost:8086"]
 TEL_CPUFLAG1=inputs.cpu.percpu=true
