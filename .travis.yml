@@ -14,8 +14,9 @@ env:
     - DOCKER_CLI_EXPERIMENTAL=enabled
   matrix:
     - TELEGRAF_VERSION=alpine
-    - TELEGRAF_VERSION=1.15-alpine
-    - TELEGRAF_VERSION=1.14-alpine
+    - TELEGRAF_VERSION=1.18-alpine
+    - TELEGRAF_VERSION=1.17-alpine
+    - TELEGRAF_VERSION=1.16-alpine
 
 before_script:
   # upgrade to latest docker-ce from repo
@@ -38,9 +39,11 @@ before_script:
 script:
   # test always passes
   - echo "Alpine $ALPINE_VERSION telegraf $TELEGRAF_VERSION"
+  - echo "Running tests..."
   - >
-    echo "Running tests...";
-    docker run $IMAGE telegraf --test
+    docker run $IMAGE cat /default.env > telegraf.env;
+    docker run --env-file telegraf.env $IMAGE cat /etc/telegraf/telegraf.conf;
+    docker run --env-file telegraf.env $IMAGE telegraf --test;
 
 after_success:
   - bash deploy.sh
