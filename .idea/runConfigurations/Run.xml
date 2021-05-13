@@ -3,6 +3,7 @@
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="drpsychick/telegraf:test" />
+        <option name="buildKitEnabled" value="true" />
         <option name="command" value="cat /default.env" />
         <option name="containerName" value="telegraf" />
         <option name="commandLineOptions" value="--env-file default.env" />
