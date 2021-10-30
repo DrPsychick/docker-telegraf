@@ -2,8 +2,10 @@ ARG TELEGRAF_VERSION=alpine
 FROM telegraf:$TELEGRAF_VERSION AS base
 
 # required for inputs.iptables and curl exec
+USER root
 RUN apk add --no-cache curl iptables
 
+USER telegraf
 ARG TARGETARCH
 ARG TOML_URL=https://github.com/DrPsychick/toml_update/releases
 ARG TOML_VERSION=0.0.7
