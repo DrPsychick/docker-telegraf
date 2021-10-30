@@ -5,7 +5,6 @@ FROM telegraf:$TELEGRAF_VERSION AS base
 USER root
 RUN apk add --no-cache curl iptables
 
-USER telegraf
 ARG TARGETARCH
 ARG TOML_URL=https://github.com/DrPsychick/toml_update/releases
 ARG TOML_VERSION=0.0.7
@@ -17,5 +16,6 @@ RUN curl -sSL -o toml_update_${TOML_VERSION}_Linux_${TARGETARCH}.tar.gz ${TOML_U
 COPY default.env toml_update.sh  /
 RUN chmod +x /toml_update.sh
 
+USER telegraf
 ENTRYPOINT ["/toml_update.sh"]
 CMD ["telegraf"]
