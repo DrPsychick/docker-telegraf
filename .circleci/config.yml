@@ -67,9 +67,13 @@ aliases:
             --build-arg TOML_VERSION=<< parameters.toml_version >> \
             --tag $IMAGE:$TAG --load .
           
-          # get dnsmasq version
-          export TLG_VERSION=$(docker run --rm $IMAGE:$TAG --version |head -n1 |sed -e 's/Telegraf \([0-9.]*\) (git:.*/\1/')
-          if [ "$TAG" != "latest" ]; then export TAG=$TLG_VERSION; fi
+          # get telegraf version
+          if [ "$TAG" != "alpine" ]; then
+            echo "Getting Telegraf version..."
+            TLG_VERSION=$(docker run --rm $IMAGE:$TAG --version |head -n1 |sed -e 's/Telegraf \([0-9.]*\) .*/\1/')
+            echo "$TLG_VERSION"
+            export TAG=$TLG_VERSION;
+          fi
 
           # login, build & push : master or "-dev"
           if [ "${CIRCLE_BRANCH}" != "master" ]; then export TAG=${TAG}-dev; fi
