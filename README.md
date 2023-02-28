@@ -1,7 +1,7 @@
 # [Docker image: drpsychick/telegraf](https://hub.docker.com/r/drpsychick/telegraf/)
 
 [![Docker image](https://img.shields.io/docker/image-size/drpsychick/telegraf?sort=date)](https://hub.docker.com/r/drpsychick/telegraf/tags)
-[![Build Status](https://travis-ci.com/DrPsychick/docker-telegraf.svg?branch=master)](https://app.travis-ci.com/github/DrPsychick/docker-telegraf)
+[![CircleCI](https://img.shields.io/circleci/build/github/DrPsychick/docker-telegraf)](https://app.circleci.com/pipelines/github/DrPsychick/docker-telegraf)
 [![DockerHub pulls](https://img.shields.io/docker/pulls/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/)
 [![GitHub stars](https://img.shields.io/github/stars/drpsychick/docker-telegraf.svg)](https://github.com/drpsychick/docker-telegraf)
 [![DockerHub stars](https://img.shields.io/docker/stars/drpsychick/telegraf.svg)](https://hub.docker.com/r/drpsychick/telegraf/)
