@@ -1,0 +1,120 @@
+# Required ENV variables
+# DOCKER_USER, DOCKER_PASS
+version: 2.1
+aliases:
+  - &parameters
+    buildx_url:
+      default: https://github.com/docker/buildx/releases
+      type: string
+    buildx_version:
+      default: v0.10.3 # github-releases:docker/buildx
+      type: string
+    telegraf_version:
+      default: 1.25-alpine # docker:library/telegraf
+      type: string
+    toml_version:
+      default: v0.1.0 # github-releases:DrPsychick/toml_update
+      type: string
+    platforms:
+      default: linux/amd64 # linux/arm64,linux/arm/v7,linux/arm64/v8
+      type: string
+    repo:
+      default: drpsychick
+      type: string
+    image:
+      default: telegraf
+      type: string
+    tag:
+      default: latest
+      type: string
+  - &docker-dind
+    - image: docker:dind
+  - &buildx
+    - checkout
+    - setup_remote_docker:
+        version: 20.10.14
+    - run:
+        name: Install buildx
+        command: |
+          apk add --no-cache curl git
+          mkdir -p ~/.docker/cli-plugins
+          fileName="buildx-<< parameters.buildx_version >>.linux-amd64"
+          url="<< parameters.buildx_url >>/download/<< parameters.buildx_version >>/${fileName}"
+          curl -sSL -o ~/.docker/cli-plugins/docker-buildx $url
+          chmod a+x ~/.docker/cli-plugins/docker-buildx
+          docker buildx install
+    - run:
+        name: Bootstrap buildx
+        command: |
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+          docker context create xbuilder
+          docker buildx create xbuilder --name xbuilder --use
+          docker buildx inspect --bootstrap
+    - run:
+        name: Build images
+        command: |
+          # build all platforms
+          IMAGE=<< parameters.repo >>/<< parameters.image >>
+          TAG=<< parameters.telegraf_version >>
+          docker buildx build --progress plain --platform << parameters.platforms >> \
+            --build-arg TELEGRAF_VERSION=<< parameters.telegraf_version >> \
+            --build-arg TOML_VERSION=<< parameters.toml_version >> \
+            --tag $IMAGE:$TAG .
+          
+          # build & load amd64
+          docker buildx build --progress plain --platform linux/amd64 \
+            --build-arg TELEGRAF_VERSION=<< parameters.telegraf_version >> \
+            --build-arg TOML_VERSION=<< parameters.toml_version >> \
+            --tag $IMAGE:$TAG --load .
+          
+          # get telegraf version
+          if [ "$TAG" != "alpine" ]; then
+            TLG_VERSION=$(docker run --rm $IMAGE:$TAG --version |head -n1 |sed -e 's/Telegraf \([0-9.]*\) .*/\1/')
+            export TAG=$TLG_VERSION;
+          else
+            export TAG=latest
+          fi
+
+          # login, build & push : master or "-dev"
+          if [ "${CIRCLE_BRANCH}" != "master" ]; then export TAG=${TAG}-dev; fi
+          echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin &> /dev/null || { echo "Docker login failed"; exit 1; }
+          echo "Pushing $IMAGE:$TAG..."
+          docker buildx build --progress plain --platform << parameters.platforms >> \
+            --build-arg TELEGRAF_VERSION=<< parameters.telegraf_version >> \
+            --build-arg TOML_VERSION=<< parameters.toml_version >> \
+            --tag $IMAGE:$TAG --push .
+
+jobs:
+  buildx:
+    parameters: *parameters
+    docker: *docker-dind
+    resource_class: small
+    steps: *buildx
+
+workflows:
+  version: 2
+  build-images:
+    jobs:
+      - buildx:
+          matrix:
+            parameters: {}
+      - buildx:
+          matrix:
+            parameters:
+              telegraf_version: ["alpine", "1.25-alpine", "1.24-alpine", "1.23-alpine"]
+
+  # build 'latest' weekly
+  weekly:
+    triggers:
+      - schedule:
+          # mondays, 6:40 am, UTC
+          cron: "40 6 * * 1"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - buildx:
+          matrix:
+            parameters:
+              telegraf_version: ["alpine", "1.25-alpine", "1.24-alpine", "1.23-alpine"]
