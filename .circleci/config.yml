@@ -3,6 +3,12 @@
 version: 2.1
 aliases:
   - &parameters
+    buildx_url:
+      default: https://github.com/docker/buildx/releases
+      type: string
+    buildx_version:
+      default: v0.10.3 # github-releases:docker/buildx
+      type: string
     telegraf_version:
       default: 1.25-alpine # docker:library/telegraf
       type: string
@@ -87,14 +93,14 @@ workflows:
     jobs:
       - buildx:
           matrix:
-            parameters:
+            parameters: {}
 
   # build 'latest' weekly
   weekly:
     triggers:
       - schedule:
-          # mondays, 6:03 am, UTC
-          cron: "3 6 * * 1"
+          # mondays, 6:40 am, UTC
+          cron: "40 6 * * 1"
           filters:
             branches:
               only:
