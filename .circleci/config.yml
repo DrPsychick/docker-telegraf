@@ -69,15 +69,15 @@ aliases:
           
           # get telegraf version
           if [ "$TAG" != "alpine" ]; then
-            echo "Getting Telegraf version..."
             TLG_VERSION=$(docker run --rm $IMAGE:$TAG --version |head -n1 |sed -e 's/Telegraf \([0-9.]*\) .*/\1/')
-            echo "$TLG_VERSION"
             export TAG=$TLG_VERSION;
+          else
+            export TAG=latest
           fi
 
           # login, build & push : master or "-dev"
           if [ "${CIRCLE_BRANCH}" != "master" ]; then export TAG=${TAG}-dev; fi
-          echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin &> /dev/null || exit 1
+          echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin &> /dev/null || { echo "Docker login failed"; exit 1; }
           echo "Pushing $IMAGE:$TAG..."
           docker buildx build --progress plain --platform << parameters.platforms >> \
             --build-arg TELEGRAF_VERSION=<< parameters.telegraf_version >> \
@@ -98,6 +98,10 @@ workflows:
       - buildx:
           matrix:
             parameters: {}
+      - buildx:
+          matrix:
+            parameters:
+              telegraf_version: ["alpine", "1.25-alpine", "1.24-alpine", "1.23-alpine"]
 
   # build 'latest' weekly
   weekly:
