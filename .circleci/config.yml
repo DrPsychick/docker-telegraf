@@ -7,7 +7,7 @@ aliases:
       default: https://github.com/docker/buildx/releases
       type: string
     buildx_version:
-      default: v0.10.3 # github-releases:docker/buildx
+      default: v0.10.4 # github-releases:docker/buildx
       type: string
     telegraf_version:
       default: 1.25-alpine # docker:library/telegraf
