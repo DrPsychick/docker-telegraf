@@ -31,7 +31,7 @@ aliases:
     - image: docker:dind
   - &buildx
     - checkout
-    - setup_remote_docker:
+    - setup_remote_docker
     - run:
         name: Install buildx
         command: |
