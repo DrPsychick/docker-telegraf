@@ -13,7 +13,7 @@ aliases:
       default: 1.25-alpine # docker:library/telegraf
       type: string
     toml_version:
-      default: v0.1.0 # github-releases:DrPsychick/toml_update
+      default: v0.2.0 # github-releases:DrPsychick/toml_update
       type: string
     platforms:
       default: linux/amd64 # linux/arm64,linux/arm/v7,linux/arm64/v8
