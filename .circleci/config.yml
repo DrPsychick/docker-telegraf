@@ -31,7 +31,8 @@ aliases:
     - image: cimg/deploy:2024.03
   - &buildx
     - checkout
-    - setup_remote_docker
+    - setup_remote_docker:
+        docker_layer_caching: true
     - run:
         name: Install buildx
         command: |
