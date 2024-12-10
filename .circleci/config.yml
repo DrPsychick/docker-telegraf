@@ -10,7 +10,7 @@ aliases:
       default: v0.19.2 # github-releases:docker/buildx
       type: string
     telegraf_version:
-      default: 1.32-alpine # docker:library/telegraf
+      default: 1.33-alpine # docker:library/telegraf
       type: string
     toml_version:
       default: v0.2.0 # github-releases:DrPsychick/toml_update
