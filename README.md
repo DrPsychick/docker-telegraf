@@ -92,6 +92,14 @@ You can use any `TLG_` variable in your `telegraf.env`. They will be added to th
 TLG_INPUTS_DISK_FLAGS=inputs.disk.ignore_fs=["tmpfs", "devtmpfs", "devfs"]
 ```
 
+## Run as `root`
+Some plugins require root privileges to work, for example `smart`. You can simply start this container as root.
+
+```shell
+docker run --user root [...] --name telegraf-root drpsychick/telegraf:latest
+```
+
+
 **Beware**:
 
 Docker only support *simple variables*. No ", no ' and especially no newlines in variables.
