@@ -93,7 +93,9 @@ TLG_INPUTS_DISK_FLAGS=inputs.disk.ignore_fs=["tmpfs", "devtmpfs", "devfs"]
 ```
 
 ## Run as `root`
-Some plugins require root privileges to work, for example `smart`. You can simply start this container as root.
+Some plugins require root privileges to work, for example `smart` 
+(see this article: https://medium.com/opsops/why-smartctl-could-not-be-run-without-root-7ea0583b1323).
+You can simply start the container with user root.
 
 ```shell
 docker run --user root [...] --name telegraf-root drpsychick/telegraf:latest
