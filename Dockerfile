@@ -3,7 +3,7 @@ FROM telegraf:$TELEGRAF_VERSION AS base
 
 # required for inputs.iptables and curl exec
 USER root
-RUN apk add --no-cache curl iptables bash
+RUN apk add --no-cache curl iptables bash smartmontools nvme-cli
 
 ARG TARGETARCH
 ARG TOML_URL=https://github.com/DrPsychick/toml_update/releases
