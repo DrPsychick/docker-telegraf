@@ -1,27 +1,22 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:recommended"
   ],
-  "enabledManagers": ["regex"],
-  "regexManagers": [
+  "ignorePaths": [
+    "Dockerfile"
+  ],
+  "customManagers": [
     {
-      "fileMatch": [
-        "^.circleci/config.yml$"
+      "customType": "regex",
+      "managerFilePatterns": [
+        "^\\.github/workflows/.*\\.yml$"
       ],
       "matchStrings": [
-        "\\sdefault: (?<currentValue>.*?) # (?<datasource>.*?):(?<depName>.*?)\\n"
+        "- alpine\\n\\s*- '(?<currentValue>[0-9]+\\.[0-9]+-alpine)'"
       ],
-      "versioningTemplate": "semver"
-    },
-    {
-      "fileMatch": [
-        "^.circleci/config.yml$"
-      ],
-      "matchStrings": [
-        "\\sdefault: \"?(?<currentValue>.*?)\"? # (?<datasource>.*?):(?<depName>.*?)\\n",
-        "\\s- image: .*:(?<currentValue>.*?) # (?<datasource>.*?):(?<depName>.*?)\\n"
-      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "telegraf",
       "versioningTemplate": "docker"
     }
   ],
@@ -31,5 +26,19 @@
       "automerge": true
     }
   ],
-  "platformAutomerge": true
+  "platformAutomerge": true,
+  "allowPostUpgradeCommandTemplating": true,
+  "allowedCommands": [
+    "node .renovate/update-matrix.js"
+  ],
+  "postUpgradeTasks": {
+    "commands": [
+      "node .renovate/update-matrix.js"
+    ],
+    "fileFilters": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/weekly.yml"
+    ],
+    "executionMode": "branch"
+  }
 }
