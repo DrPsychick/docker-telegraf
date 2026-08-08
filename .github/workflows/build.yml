@@ -45,7 +45,7 @@ jobs:
       # the telegraf version string (mirrors the CircleCI "build & load amd64"
       # step).
       - name: Build single platform for version detection
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64
@@ -79,7 +79,7 @@ jobs:
 
       - name: Push image
         if: inputs.push_image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           platforms: ${{ env.PLATFORMS }}
