@@ -1,0 +1,30 @@
+name: Weekly Rebuild
+
+# Reuses .github/workflows/build.yml (reusable workflow).
+# Runs every Monday 06:40 UTC, on master only (matches CircleCI filters:
+#   branches.only: [master]).
+
+on:
+  schedule:
+    # Mondays, 06:40 UTC (matches CircleCI cron: 40 6 * * 1)
+    - cron: '40 6 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    strategy:
+      matrix:
+        telegraf_version:
+          - alpine
+          - '1.39-alpine'
+          - '1.38-alpine'
+          - '1.37-alpine'
+      fail-fast: false
+    uses: ./.github/workflows/build.yml
+    with:
+      telegraf_version: ${{ matrix.telegraf_version }}
+      push_image: true
+    secrets: inherit

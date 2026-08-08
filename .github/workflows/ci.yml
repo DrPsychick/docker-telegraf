@@ -1,0 +1,32 @@
+name: Build & Push (CI)
+
+# Reuses .github/workflows/build.yml (reusable workflow).
+# Only pushes Docker images when the workflow runs on pushes to master.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        telegraf_version:
+          - alpine
+          - '1.39-alpine'
+          - '1.38-alpine'
+          - '1.37-alpine'
+      fail-fast: false
+    uses: ./.github/workflows/build.yml
+    with:
+      telegraf_version: ${{ matrix.telegraf_version }}
+      # Push only when this is a push event on the master branch.
+      # PR builds still run (build + version detection) but skip the push step.
+      push_image: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+    secrets: inherit

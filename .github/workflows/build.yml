@@ -1,0 +1,91 @@
+name: Build & Push Docker Image
+
+# Reusable workflow. Call from ci.yml (CI push/PR) or weekly.yml (cron).
+on:
+  workflow_call:
+    inputs:
+      telegraf_version:
+        description: "Telegraf base image tag (e.g. alpine, 1.38-alpine)"
+        type: string
+        required: true
+      push_image:
+        description: "Push to Docker Hub (true=master push / weekly; false=PR-only build)"
+        type: boolean
+        default: false
+    secrets:
+      DOCKER_USER:
+        required: true
+      DOCKER_PASS:
+        required: true
+    outputs:
+      tagged_version:
+        description: "The final image tag"
+        value: ${{ jobs.build.outputs.TAG }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      TAG: ${{ steps.version.outputs.TAG }}
+    env:
+      IMAGE: drpsychick/telegraf
+      PLATFORMS: linux/amd64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ---- version detection ----
+      # Build a single-platform image, load it locally, and run it to read
+      # the telegraf version string (mirrors the CircleCI "build & load amd64"
+      # step).
+      - name: Build single platform for version detection
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          build-args: |
+            TELEGRAF_VERSION=${{ inputs.telegraf_version }}
+            TOML_VERSION=v0.2.0
+          load: true
+          cache-from: type=gha
+
+      - name: Determine tag
+        id: version
+        run: |
+          if [ "${{ inputs.telegraf_version }}" = "alpine" ]; then
+            TAG="latest"
+          else
+            # Run the image to read the telegraf version (matches circleci logic)
+            TLG_VERSION=$(docker run --rm $IMAGE:${{ inputs.telegraf_version }} telegraf --version 2>&1 \
+              | head -n1 \
+              | sed -e 's/Telegraf \([0-9.]*\) .*/\1/')
+            TAG="${{ inputs.telegraf_version }}/${TLG_VERSION}"
+          fi
+          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+
+      # ---- push (master only) ----
+      - name: Login to Docker Hub
+        if: inputs.push_image
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      - name: Push image
+        if: inputs.push_image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: ${{ env.PLATFORMS }}
+          build-args: |
+            TELEGRAF_VERSION=${{ inputs.telegraf_version }}
+            TOML_VERSION=v0.2.0
+          push: true
+          tags: $IMAGE:${{ steps.version.outputs.TAG }}
+          cache-from: type=gha
