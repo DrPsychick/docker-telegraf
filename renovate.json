@@ -10,7 +10,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "^\\.github/workflows/.*\\.yml$"
+        "/^\\.github/workflows/.*\\.yml$/"
       ],
       "matchStrings": [
         "- alpine\\n\\s*- '(?<currentValue>[0-9]+\\.[0-9]+-alpine)'"
