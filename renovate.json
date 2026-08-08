@@ -27,18 +27,5 @@
     }
   ],
   "platformAutomerge": true,
-  "allowPostUpgradeCommandTemplating": true,
-  "allowedCommands": [
-    "node .renovate/update-matrix.js"
-  ],
-  "postUpgradeTasks": {
-    "commands": [
-      "node .renovate/update-matrix.js"
-    ],
-    "fileFilters": [
-      ".github/workflows/ci.yml",
-      ".github/workflows/weekly.yml"
-    ],
-    "executionMode": "branch"
-  }
+  "allowPostUpgradeCommandTemplating": true
 }
