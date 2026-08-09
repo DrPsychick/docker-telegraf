@@ -1,5 +1,8 @@
 ARG TELEGRAF_VERSION=alpine
 FROM telegraf:$TELEGRAF_VERSION AS base
+LABEL org.opencontainers.image.authors="drpsychick@drsick.net"
+LABEL org.opencontainers.image.description="Telegraf metric collector with automatic TOML config update"
+LABEL org.opencontainers.image.source="https://github.com/DrPsychick/docker-telegraf"
 
 # required for inputs.iptables and curl exec
 USER root
