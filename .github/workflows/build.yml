@@ -53,6 +53,7 @@ jobs:
             TELEGRAF_VERSION=${{ inputs.telegraf_version }}
             TOML_VERSION=v0.2.0
           load: true
+          tags: ${{ env.IMAGE }}:${{ inputs.telegraf_version }}
           cache-from: type=gha
 
       - name: Determine tag
@@ -62,7 +63,7 @@ jobs:
             TAG="latest"
           else
             # Run the image to read the telegraf version (matches circleci logic)
-            TLG_VERSION=$(docker run --rm $IMAGE:${{ inputs.telegraf_version }} telegraf --version 2>&1 \
+            TLG_VERSION=$(docker run --rm $IMAGE:${{ inputs.telegraf_version }} telegraf --version 2>/dev/null \
               | head -n1 \
               | sed -e 's/Telegraf \([0-9.]*\) .*/\1/')
             TAG="${{ inputs.telegraf_version }}/${TLG_VERSION}"
