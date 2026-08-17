@@ -87,5 +87,5 @@ jobs:
             TELEGRAF_VERSION=${{ inputs.telegraf_version }}
             TOML_VERSION=v0.2.0
           push: true
-          tags: $IMAGE:${{ steps.version.outputs.TAG }}
+          tags: ${{ env.IMAGE }}:${{ steps.version.outputs.TAG }}
           cache-from: type=gha
