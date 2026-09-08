@@ -19,7 +19,7 @@ jobs:
       matrix:
         telegraf_version:
           - alpine
-          - '1.39-alpine'
+          - '1.40-alpine'
           - '1.38-alpine'
           - '1.37-alpine'
       fail-fast: false
